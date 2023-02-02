@@ -10,21 +10,27 @@ function Search() {
 	const { data, error, isLoading, resultCount } = useSearch({ searchTerm });
 
 	const [sortedByScore, setSortedByScore] = useState<PersonProps[]>([]);
+	const [limit, setLimit] = useState<number>(10);
 
 	useEffect(() => {
 		if (data !== undefined) {
 			const sorted = data.sort((a: PersonProps, b: PersonProps) => {
 				return b.score - a.score;
 			});
-			setSortedByScore(sorted);
+			const sliced = sorted.slice(0, limit);
+			setSortedByScore(sliced);
 		}
-	}, [data]);
+	}, [data, limit]);
 
 	useEffect(() => {
 		return () => {
 			localStorage.setItem("searchTerm", searchTerm);
 		};
 	}, [searchTerm]);
+
+	useEffect(() => {
+		setLimit(10);
+	}, [isLoading]);
 
 	function searchHandler(e: React.ChangeEvent<HTMLInputElement>) {
 		setSearchTerm(e.target.value);
@@ -60,6 +66,15 @@ function Search() {
 				sortedByScore?.map((person: PersonProps) => (
 					<Person person={person} />
 				))}
+
+			<div className="my-4">
+				<button
+					className="btn btn-primary btn-block btn-lg"
+					onClick={() => setLimit(limit + 10)}
+				>
+					Load more
+				</button>
+			</div>
 		</>
 	);
 }
